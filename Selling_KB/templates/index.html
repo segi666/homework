@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Do+Hyeon&display=swap" rel="stylesheet">
+    <!-- Required meta tags -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+          integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
+            integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+            crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
+            integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+            crossorigin="anonymous"></script>
+    <meta charset="UTF-8">
+    <title>케틀벨 나라</title>
+    <style>
+        .wrap {
+            width: 600px;
+            margin: auto;
+            border: 2px solid black;
+            border-radius: 30px;
+            padding: 30px;
+            font-family: 'Do Hyeon', sans-serif;
+        }
+
+        .image {
+            display: block;
+            margin: 0px auto;
+        }
+
+        h1, h5 {
+            display: inline;
+        }
+
+        .info {
+            display: block;
+            margin: 20px auto;
+        }
+
+        .btn-primary {
+            display: block;
+            margin: 0px auto;
+        }
+
+        table {
+            border: 1px solid;
+            border-collapse: collapse;
+        }
+
+        td,
+        th {
+            padding: 10px;
+            border: 1px solid;
+        }
+
+        .table {
+            margin-top: 36px;
+            display: flex;
+            justify-content: center;
+        }
+
+        #currency {
+            color: blue;
+        }
+    </style>
+
+    <script>
+        $(document).ready(function () {
+            $.ajax({
+                type: "GET",
+                url: "https://api.manana.kr/exchange/rate.json",
+                data: {},
+                success: function (response) {
+                    let won = response[1]["rate"];
+                    $('#currency').append(won);
+                }
+            })
+        })
+
+        $(document).ready(function () {
+            $.ajax({
+                type: "GET",
+                url: "/order",
+                data: {},
+                success: function (response) {
+                    if (response["result"] === "success") {
+                        let rows = response["data"];
+                        for (let i = 0; i < rows.length; i++) {
+                            let row = rows[i]
+                            let name = row["name"]
+                            let num = row["num"]
+                            let address = row["address"]
+                            let phone = row["phone"]
+                            let temp = `<tr>
+                                            <td>${name}</td>
+                                            <td>${num}</td>
+                                            <td>${address}</td>
+                                            <td>${phone}</td>
+                                        </tr>`
+                            $('#customer-info').append(temp)
+                        }
+                    } else {
+                        alert("주문 내역을 받아오지 못했습니다.")
+                    }
+                }
+            })
+        })
+
+        function order() {
+            let name = $('#orderName').val();
+            let num = $('#orderNum').val();
+            let address = $('#orderAddress').val();
+            let phone = $('#orderPhone').val();
+            if (name === '') {
+                alert("이름을 입력해주세요")
+                $('#orderName').focus();
+                return;
+            } else if (num === '') {
+                alert("수량을 입력해주세요")
+                $('#orderNum').focus();
+                return;
+            } else if (address === '') {
+                alert("주소를 입력해주세요")
+                $('#orderAddress').focus();
+                return;
+            } else if (phone === '') {
+                alert("핸드폰번호를 입력해주세요")
+                $('#orderPhone').focus();
+                return;
+            } else if (!isCellphone(phone)) {
+                alert("전화번호 입력 형식이 틀립니다. \n 010-0000-0000으로 입력해주세요")
+                return;
+            }
+
+            $.ajax({
+                type: "POST",
+                url: "/order",
+                data: {
+                    'name_give': name,
+                    'num_give': num,
+                    'address_give': address,
+                    'phone-give': phone
+                },
+                success: function (response) {
+                    if (response["result"] === "success") {
+                        alert(response["msg"]);
+                        window.location.reload();
+                    }
+                }
+            })
+        }
+
+        function isCellphone(phone) {
+            return /\d{3}-\d{3,4}-\d{3}/.test(phone)
+        }
+
+    </script>
+</head>
+<body>
+<div class="wrap">
+    <div>
+        <img class="image"
+             src="https://frogfitness.co.kr/web/product/big/20191205/57b5acf3077b92e2c7a434ce63d76f61.gif"
+             alt="케틀벨48kg">
+    </div>
+    <h1>케틀벨 48kg </h1>
+    <h5>가격: 215,000원/개</h5>
+    <h6>집 안에서도, 집 밖에서도 1평 공간만 있다면 어디서든 운동 할 수 있습니다. 신체 단련으로 면역력 UP! 코로나 BYE! </h6>
+    <h6 id="currency">달러-원 환율:</h6>
+    <div class="info">
+        <div class="input-group mb-3">
+            <div class="input-group-prepend">
+                <span class="input-group-text">주문자 이름</span>
+            </div>
+            <input id="orderName" type="text" class="form-control" placeholder="한글명을 기재해주세요" aria-label="이름"
+                   aria-describedby="basic-addon1">
+        </div>
+        <div class="input-group mb-3">
+            <div class="input-group-prepend">
+                <label class="input-group-text" for="orderNum">수량</label>
+            </div>
+            <select id="orderNum" class="custom-select">
+                <option selected value="">-- 수량을 선택하세요 --</option>
+                <option value="1">1개</option>
+                <option value="2">2개</option>
+                <option value="3">3개</option>
+            </select>
+        </div>
+        <div class="input-group mb-3">
+            <div class="input-group-prepend">
+                <span class="input-group-text">주소</span>
+            </div>
+            <input id="orderAddress" type="text" class="form-control" placeholder="" aria-label="주소"
+                   aria-describedby="basic-addon1">
+        </div>
+        <div class="input-group mb-3">
+            <div class="input-group-prepend">
+                <span class="input-group-text">전화번호</span>
+            </div>
+            <input id="orderPhone" type="text" class="form-control" placeholder="" aria-label="전화번호"
+                   aria-describedby="basic-addon1">
+        </div>
+        <button onclick="order()" type="button" class="btn btn-primary">주문하기</button>
+        <div class="table">
+            <table>
+                <thead>
+                <tr>
+                    <td>이름</td>
+                    <td>수량</td>
+                    <td>주소</td>
+                    <td>전화번호</td>
+                </tr>
+                </thead>
+                <tbody id="customer-info">
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+</body>
+</html>
